@@ -1,0 +1,316 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexSport — Treinador & Performance Esportiva</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Chakra Petch (esportiva para números/títulos) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Chakra Petch', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            950: '#090b10',
+                            900: '#0f131a',
+                            800: '#161b26',
+                            700: '#212836',
+                        },
+                        volt: {
+                            400: '#bef264',
+                            500: '#a3e635',
+                            600: '#84cc16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos customizados complementares ao Tailwind */
+        body {
+            background-color: #090b10;
+            color: #f8fafc;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Barra de rolagem discreta */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f131a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #212836;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3e635;
+        }
+        /* Animação suave de entrada */
+        .fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Glow esportivo */
+        .volt-glow {
+            box-shadow: 0 0 20px rgba(163, 230, 53, 0.2);
+        }
+        /* Ocultar setas padrão de inputs numéricos */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-volt-500 selection:text-dark-950 pb-20 md:pb-8">
+
+    <!-- Notificação Toast Customizada (Substitui alert()) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
+
+    <!-- Cabeçalho Principal -->
+    <header class="sticky top-0 z-40 bg-dark-950/90 backdrop-blur-md border-b border-dark-700/80">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-volt-400 to-emerald-500 flex items-center justify-center text-dark-950 shadow-lg volt-glow">
+                    <i data-lucide="zap" class="w-6 h-6 stroke-[2.5]"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-xl tracking-wide text-white leading-none">
+                        APEX<span class="text-volt-400">SPORT</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-medium tracking-wider uppercase mt-0.5">Alta Performance & Treino</p>
+                </div>
+            </div>
+
+            <!-- Navegação Desktop -->
+            <nav class="hidden md:flex items-center gap-1 bg-dark-900 p-1 rounded-xl border border-dark-700">
+                <button onclick="switchTab('treino')" data-tab="treino" class="nav-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-volt-500 text-dark-950">
+                    <i data-lucide="dumbbell" class="w-4 h-4"></i> Treino do Dia
+                </button>
+                <button onclick="switchTab('timer')" data-tab="timer" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-dark-800 transition-all">
+                    <i data-lucide="timer" class="w-4 h-4"></i> Timer HIIT
+                </button>
+                <button onclick="switchTab('metricas')" data-tab="metricas" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-dark-800 transition-all">
+                    <i data-lucide="activity" class="w-4 h-4"></i> Métricas & Zonas
+                </button>
+                <button onclick="switchTab('diario')" data-tab="diario" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-dark-800 transition-all">
+                    <i data-lucide="trophy" class="w-4 h-4"></i> Diário & Nutrição
+                </button>
+            </nav>
+
+            <!-- Badge de Sequência / Streak -->
+            <div class="flex items-center gap-2 bg-dark-800 border border-dark-700 px-3 py-1.5 rounded-xl">
+                <i data-lucide="flame" class="w-4 h-4 text-orange-500 fill-orange-500"></i>
+                <span class="text-xs font-bold text-slate-200"><span id="header-workouts-count">0</span> treinos</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 pt-5">
+
+        <!-- ===================================================================== -->
+        <!-- ABA 1: TREINO DO DIA (GERADOR PERSONALIZADO)                          -->
+        <!-- ===================================================================== -->
+        <section id="tab-treino" class="tab-content fade-in space-y-6">
+            
+            <!-- Banner Motivacional Dinâmico -->
+            <div class="bg-gradient-to-r from-dark-800 via-dark-800 to-dark-900 border border-dark-700 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-volt-400 bg-volt-500/10 px-2.5 py-1 rounded-full">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Foco do Atleta
+                    </span>
+                    <p id="motivational-quote" class="text-sm sm:text-base font-medium text-slate-200 italic">
+                        "A disciplina transforma talento em resultado dentro de quadra, pista ou campo."
+                    </p>
+                </div>
+                <button onclick="newQuote()" class="text-xs text-slate-400 hover:text-volt-400 flex items-center gap-1 shrink-0 transition-colors">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Nova frase
+                </button>
+            </div>
+
+            <!-- Painel de Configuração do Treino -->
+            <div class="bg-dark-900 border border-dark-700 rounded-2xl p-5 shadow-xl space-y-5">
+                <div class="flex items-center justify-between border-b border-dark-700 pb-3">
+                    <h2 class="font-display font-bold text-lg text-white flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-5 h-5 text-volt-400"></i> Configurar Sessão de Treino
+                    </h2>
+                    <span id="selected-badge" class="text-xs font-semibold text-volt-400 bg-dark-800 px-3 py-1 rounded-lg border border-dark-700">
+                        Futebol • Intermediário
+                    </span>
+                </div>
+
+                <!-- 1. Seleção de Esporte -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">1. Escolha a Modalidade Esportiva</label>
+                    <div id="sport-selector" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+
+                <!-- 2. Objetivo e Nível -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">2. Objetivo Principal</label>
+                        <div id="goal-selector" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">3. Nível de Condicionamento</label>
+                        <div id="level-selector" class="grid grid-cols-3 gap-2">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-1 flex flex-col sm:flex-row gap-3">
+                    <button onclick="generateWorkout()" class="flex-1 bg-volt-500 hover:bg-volt-400 active:scale-[0.99] text-dark-950 font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg volt-glow cursor-pointer">
+                        <i data-lucide="zap" class="w-5 h-5"></i> Gerar Plano de Treino Personalizado
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plano de Treino Gerado -->
+            <div id="workout-plan-container" class="space-y-5">
+                <!-- Cabeçalho de Progresso do Treino Atual -->
+                <div class="bg-dark-900 border border-dark-700 rounded-2xl p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="plan-sport-tag" class="text-xs font-bold uppercase px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400">Futebol</span>
+                                <span id="plan-duration-tag" class="text-xs font-medium text-slate-400 flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> ~55 min
+                                </span>
+                            </div>
+                            <h3 id="plan-title" class="font-display font-bold text-xl sm:text-2xl text-white mt-1">
+                                Sessão de Agilidade & Explosão
+                            </h3>
+                        </div>
+                        <button onclick="completeAndLogWorkout()" id="finish-workout-btn" class="bg-emerald-500 hover:bg-emerald-400 text-dark-950 font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Concluir & Salvar no Diário
+                        </button>
+                    </div>
+
+                    <!-- Barra de Progresso -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-400">Progresso da Sessão</span>
+                            <span id="workout-progress-text" class="text-volt-400">0% (0/0 exercícios)</span>
+                        </div>
+                        <div class="w-full h-3 bg-dark-800 rounded-full overflow-hidden p-0.5 border border-dark-700">
+                            <div id="workout-progress-bar" class="h-full bg-gradient-to-r from-volt-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blocos do Treino (Aquecimento, Principal, Desaquecimento) -->
+                <div id="workout-blocks" class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <!-- Renderizado via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- ABA 2: CRONÔMETRO & TIMER HIIT / TABATA INTEGRADO                     -->
+        <!-- ===================================================================== -->
+        <section id="tab-timer" class="tab-content hidden fade-in space-y-6">
+            <div class="max-w-2xl mx-auto space-y-6">
+                
+                <!-- Seletor de Modo do Timer -->
+                <div class="bg-dark-900 p-1.5 rounded-2xl border border-dark-700 grid grid-cols-3 gap-1.5">
+                    <button onclick="setTimerMode('hiit')" id="mode-btn-hiit" class="timer-mode-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-volt-500 text-dark-950 transition-all">
+                        HIIT / Tabata
+                    </button>
+                    <button onclick="setTimerMode('stopwatch')" id="mode-btn-stopwatch" class="timer-mode-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:bg-dark-800 transition-all">
+                        Cronômetro Livre
+                    </button>
+                    <button onclick="setTimerMode('countdown')" id="mode-btn-countdown" class="timer-mode-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:bg-dark-800 transition-all">
+                        Regressivo
+                    </button>
+                </div>
+
+                <!-- Display Principal do Timer -->
+                <div id="timer-card" class="bg-dark-900 border-2 border-dark-700 rounded-3xl p-6 sm:p-10 text-center space-y-6 transition-colors duration-300 relative overflow-hidden">
+                    <!-- Indicador de Fase (HIIT) -->
+                    <div class="flex items-center justify-between">
+                        <span id="timer-phase-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-volt-500/20 text-volt-400">
+                            <span class="w-2 h-2 rounded-full bg-volt-400 animate-pulse"></span> PRONTO PARA INICIAR
+                        </span>
+                        <span id="timer-round-display" class="font-display font-bold text-sm text-slate-300 bg-dark-800 px-3 py-1 rounded-lg border border-dark-700">
+                            Round 1 / 8
+                        </span>
+                    </div>
+
+                    <!-- Relógio Gigante -->
+                    <div class="py-4">
+                        <div id="timer-display" class="font-display font-bold text-6xl sm:text-8xl tracking-tight text-white tabular-nums">
+                            00:30
+                        </div>
+                        <p id="timer-subtext" class="text-xs sm:text-sm text-slate-400 mt-2 font-medium">
+                            Alertas sonoros ativados (Web Audio API)
+                        </p>
+                    </div>
+
+                    <!-- Barra de progresso visual do intervalo -->
+                    <div class="w-full h-2.5 bg-dark-800 rounded-full overflow-hidden">
+                        <div id="timer-visual-bar" class="h-full bg-volt-500 transition-all duration-200" style="width: 100%"></div>
+                    </div>
+
+                    <!-- Controles do Timer -->
+                    <div class="flex items-center justify-center gap-3 pt-2">
+                        <button onclick="toggleTimer()" id="timer-start-btn" class="flex-1 max-w-[180px] bg-volt-500 hover:bg-volt-400 text-dark-950 font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg volt-glow cursor-pointer">
+                            <i data-lucide="play" class="w-5 h-5 fill-current"></i> <span id="timer-start-label">Iniciar</span>
+                        </button>
+                        <button onclick="lapTimer()" id="timer-lap-btn" class="hidden bg-dark-800 hover:bg-dark-700 text-white font-semibold py-3.5 px-5 rounded-2xl border border-dark-700 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            <i data-lucide="flag" class="w-5 h-5 text-volt-400"></i> Volta
+                        </button>
+                        <button onclick="resetTimer()" class="bg-dark-800 hover:bg-dark-700 text-slate-200 font-semibold py-3.5 px-5 rounded-2xl border border-dark-700 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Zerar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Configurações específicas do Modo HIIT -->
+                <div id="hiit-settings" class="bg-dark-900 border border-dark-700 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-display font-bold text-base text-white flex items-center gap-2">
+                            <i data-lucide="settings-2" class="w-4 h-4 text-volt-400"></i> Configurar Intervalos HIIT
+                        </h3>
+                        <div class="flex gap-1.5">
+                            <button onclick="applyHiitPreset(20, 10, 8)" class="text-xs bg-dark-800 hover:bg-dark-700 text-volt-400 font-semibold px-2.5 py-1 rounded-lg border border-dark-700">Tabata 20/10</button>
+                            <button onclick="applyHiitPreset(40, 20, 6)" class="text-xs bg-dark-800 hover:bg-dark-700 text-slate-300 font-semibold px-2.5 py-1 rounded-lg border border-dark-700">40/20</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-dark-800 p-3 rounded-xl border border-dark-700">
+                            <label class="block text-[11px] font-bold uppercase text-emerald-400 mb-1">Esforço (seg)</label>
+                            <input type="number" id="hiit-work" value="30" min="5" max="300" onchange="resetTimer()" class="w-full bg-dark-950 text-white font-display font-bold text-lg px-3 py-1.5 rounded-lg border border-dark-700 focus:border-volt-500 focus:outline-none">
+                        </div>
+                        <div class="bg-dark-800 p-3 rounded-xl border border-dark-700">
+                            <label class="block text-[11px] font-bold uppercase text-amber-400 mb-1">Descanso (seg)</label>
+                            <input type="number" id="hiit-rest" value="15" min="5" max="300" onchange="resetTimer()" class="w-full bg-dark-950 text-white font-display font-bold text-lg px-3 py-1.5 rounded-lg border border-dark-700 focus:border-volt-500 focus:outline-none">
+                        </div>
+                        <div class="bg-dark-800 p-3 rounded-xl border border-dark-700">
+                            <label class="block text-[11px] font-bold uppercase text-sky-400 mb-1">Rounds</label>
+                            <input type="number" id="hiit-rounds" value="8" min="1" max="50" onchange="resetTimer()" class="w-full bg-dark-950 text-white font-display font-bold text-lg px-3 py-1.5 rounded-lg border border-dark-700 focus:border-volt-500 focus:outline-none">
